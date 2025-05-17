@@ -1,0 +1,3 @@
+__pycache__/* linguist-vendored
+instance/*.db linguist-vendored
+*.pyc linguist-generated

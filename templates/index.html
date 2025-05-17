@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}SCR - Secure Cyber Reconnaissance Platform{% endblock %}
+
+{% block content %}
+<div class="landing-page">
+    <div class="row align-items-center">
+        <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
+            <h1 class="display-4 mb-4 text-gradient">Secure Cyber Reconnaissance</h1>
+            <p class="lead mb-4">Discover vulnerabilities in your web applications before hackers do. Our platform provides real-time security scanning and vulnerability detection.</p>
+            
+            <div class="features mb-4">
+                <div class="feature-item" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <div>
+                        <h5>Real-Time Scanning</h5>
+                        <p>Our advanced scanners detect vulnerabilities as they happen</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item" data-aos="fade-up" data-aos-delay="200">
+                    <i class="fas fa-lock feature-icon"></i>
+                    <div>
+                        <h5>Encrypted Storage</h5>
+                        <p>All your sensitive data is securely encrypted</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item" data-aos="fade-up" data-aos-delay="300">
+                    <i class="fas fa-file-alt feature-icon"></i>
+                    <div>
+                        <h5>Detailed Reports</h5>
+                        <p>Comprehensive reports with actionable security insights</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-3 pulse-btn">
+                    <i class="fas fa-user-plus"></i> Get Started
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 text-center" data-aos="fade-left" data-aos-duration="1000">
+            <div class="animation-container">
+                <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_26ewjioz.json" background="transparent" speed="1" style="width: 100%; height: 400px;" loop autoplay></lottie-player>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-gradient-dark" data-aos="zoom-in">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">How It Works</h2>
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="step-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <h4>1. Enter Domain</h4>
+                            <p>Provide the domain you want to scan for vulnerabilities</p>
+                        </div>
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="step-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h4>2. Advanced Scanning</h4>
+                            <p>Our platform performs comprehensive security checks</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="step-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h4>3. Get Results</h4>
+                            <p>Receive detailed reports with actionable insights</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-gradient-dark" data-aos="fade-up">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Vulnerability Detection</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="vuln-card">
+                                <div class="vuln-icon high">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="vuln-content">
+                                    <h4>SQL Injection</h4>
+                                    <p>Detect SQL injection vulnerabilities that could lead to data leaks</p>
+                                    <span class="badge bg-danger">High Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="vuln-card">
+                                <div class="vuln-icon high">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="vuln-content">
+                                    <h4>Cross-Site Scripting (XSS)</h4>
+                                    <p>Find XSS flaws that allow attackers to inject malicious scripts</p>
+                                    <span class="badge bg-danger">High Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="vuln-card">
+                                <div class="vuln-icon medium">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="vuln-content">
+                                    <h4>Missing Security Headers</h4>
+                                    <p>Identify missing HTTP security headers that protect your site</p>
+                                    <span class="badge bg-warning text-dark">Medium Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="vuln-card">
+                                <div class="vuln-icon medium">
+                                    <i class="fas fa-network-wired"></i>
+                                </div>
+                                <div class="vuln-content">
+                                    <h4>Open Ports & Services</h4>
+                                    <p>Discover potentially vulnerable open ports and services</p>
+                                    <span class="badge bg-warning text-dark">Medium Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+    });
+</script>
+{% endblock %}

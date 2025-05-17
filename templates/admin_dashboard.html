@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SCR Platform{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header" data-aos="fade-down">
+                <h1><i class="fas fa-tachometer-alt me-2"></i> Admin Dashboard</h1>
+                <p class="lead">System overview and management</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="100">
+            <div class="stat-card bg-gradient-primary">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.total_users }}</h2>
+                    <p>Total Users</p>
+                </div>
+                <div class="stat-footer">
+                    <a href="{{ url_for('admin.users') }}">View All <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="200">
+            <div class="stat-card bg-gradient-info">
+                <div class="stat-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.total_scans }}</h2>
+                    <p>Total Scans</p>
+                </div>
+                <div class="stat-footer">
+                    <a href="{{ url_for('admin.scans') }}">View All <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="300">
+            <div class="stat-card bg-gradient-warning">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.active_users }}</h2>
+                    <p>Active Users</p>
+                </div>
+                <div class="stat-footer">
+                    <span class="small text-light">Last 7 days</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
+            <div class="stat-card bg-gradient-danger">
+                <div class="stat-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.blocked_domains }}</h2>
+                    <p>Blocked Domains</p>
+                </div>
+                <div class="stat-footer">
+                    <a href="{{ url_for('admin.domains') }}">Manage <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4 mb-lg-0" data-aos="fade-up">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Daily Scan Activity</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="scanActivityChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Risk Distribution</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="riskDistributionChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Recent Scans</h4>
+                    <a href="{{ url_for('admin.scans') }}" class="btn btn-sm btn-outline-primary">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_scans %}
+                                    {% for scan in recent_scans %}
+                                        <tr>
+                                            <td>{{ scan.domain }}</td>
+                                            <td>
+                                                {% if scan.user %}
+                                                    {{ scan.user.username }}
+                                                {% else %}
+                                                    <span class="text-muted">Unknown</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ scan.scan_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                {% if scan.risk_level == 'High Risk' %}
+                                                    <span class="badge bg-danger">{{ scan.risk_level }}</span>
+                                                {% elif scan.risk_level == 'Medium Risk' %}
+                                                    <span class="badge bg-warning text-dark">{{ scan.risk_level }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">{{ scan.risk_level }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No recent scans</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Most Scanned Domains</h4>
+                    <a href="{{ url_for('admin.domains') }}" class="btn btn-sm btn-outline-primary">
+                        Manage Domains
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Scan Count</th>
+                                    <th>Last Scanned</th>
+                                    <th>Avg. Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if most_scanned %}
+                                    {% for domain in most_scanned %}
+                                        <tr>
+                                            <td>{{ domain.domain }}</td>
+                                            <td>{{ domain.scan_count }}</td>
+                                            <td>{{ domain.last_scanned.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                {% if domain.avg_risk_score > 6 %}
+                                                    <span class="text-danger">{{ "%.1f"|format(domain.avg_risk_score) }}</span>
+                                                {% elif domain.avg_risk_score > 3 %}
+                                                    <span class="text-warning">{{ "%.1f"|format(domain.avg_risk_score) }}</span>
+                                                {% else %}
+                                                    <span class="text-success">{{ "%.1f"|format(domain.avg_risk_score) }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No domain statistics available</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12" data-aos="fade-up" data-aos-delay="400">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <a href="{{ url_for('admin.users') }}" class="action-card">
+                                <div class="action-icon bg-primary">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h5>Manage Users</h5>
+                                    <p>View and manage user accounts</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <a href="{{ url_for('admin.domains') }}" class="action-card">
+                                <div class="action-icon bg-success">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h5>Domain Control</h5>
+                                    <p>Block or unblock domains</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <a href="{{ url_for('admin.scans') }}" class="action-card">
+                                <div class="action-icon bg-info">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h5>View Scans</h5>
+                                    <p>Browse all scan results</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="action-card">
+                                <div class="action-icon bg-warning">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h5>System Settings</h5>
+                                    <p>Configure platform options</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+        
+        // Fetch admin statistics
+        fetch('{{ url_for("admin.api_stats") }}')
+            .then(response => response.json())
+            .then(data => {
+                // Create Daily Scan Activity Chart
+                const scanActivityCtx = document.getElementById('scanActivityChart').getContext('2d');
+                new Chart(scanActivityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.daily_scans.labels,
+                        datasets: [{
+                            label: 'Daily Scans',
+                            data: data.daily_scans.data,
+                            fill: {
+                                target: 'origin',
+                                above: 'rgba(13, 110, 253, 0.1)'
+                            },
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            tension: 0.3,
+                            pointRadius: 3,
+                            pointBackgroundColor: 'rgba(13, 110, 253, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#fff'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#fff',
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#fff'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Create Risk Distribution Chart
+                const riskDistributionCtx = document.getElementById('riskDistributionChart').getContext('2d');
+                new Chart(riskDistributionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.risk_distribution.labels,
+                        datasets: [{
+                            data: data.risk_distribution.data,
+                            backgroundColor: [
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(40, 167, 69, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(220, 53, 69, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(40, 167, 69, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#fff'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching statistics:', error);
+            });
+    });
+</script>
+{% endblock %}

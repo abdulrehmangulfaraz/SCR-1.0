@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}All Scans - Admin - SCR Platform{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header" data-aos="fade-down">
+                <h1><i class="fas fa-search me-2"></i> All Scans</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Scans</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-gradient-dark" data-aos="fade-up">
+                <div class="card-header bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Scan History</h4>
+                        <div class="d-flex">
+                            <div class="dropdown me-2">
+                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-filter me-1"></i> Filter
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="filterDropdown">
+                                    <li><a class="dropdown-item" href="#">All Risks</a></li>
+                                    <li><a class="dropdown-item" href="#">High Risk Only</a></li>
+                                    <li><a class="dropdown-item" href="#">Medium Risk Only</a></li>
+                                    <li><a class="dropdown-item" href="#">Low Risk Only</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Last 24 Hours</a></li>
+                                    <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
+                                    <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
+                                </ul>
+                            </div>
+                            <div class="input-group" style="max-width: 300px;">
+                                <input type="text" class="form-control bg-dark text-light form-control-sm" id="searchScans" placeholder="Search domains...">
+                                <button class="btn btn-outline-primary btn-sm" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Domain</th>
+                                    <th>User</th>
+                                    <th>Scan Date</th>
+                                    <th>Risk Score</th>
+                                    <th>Risk Level</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if scans.items %}
+                                    {% for scan in scans.items %}
+                                        <tr>
+                                            <td>{{ scan.id }}</td>
+                                            <td>{{ scan.domain }}</td>
+                                            <td>
+                                                {% if scan.user %}
+                                                    {{ scan.user.username }}
+                                                {% else %}
+                                                    <span class="text-muted">Unknown</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ scan.scan_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ scan.risk_score }}</td>
+                                            <td>
+                                                {% if scan.risk_level == 'High Risk' %}
+                                                    <span class="badge bg-danger">{{ scan.risk_level }}</span>
+                                                {% elif scan.risk_level == 'Medium Risk' %}
+                                                    <span class="badge bg-warning text-dark">{{ scan.risk_level }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">{{ scan.risk_level }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('admin.view_scan', scan_id=scan.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                {% if scan.report_path %}
+                                                <a href="{{ url_for('static', filename=scan.report_path.replace('static/', '')) }}" target="_blank" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-file-pdf"></i> PDF
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center">No scans found</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if scans.pages > 1 %}
+                    <div class="d-flex justify-content-center mt-4 mb-3">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                {% if scans.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.scans', page=scans.prev_num) }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for page_num in scans.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                    {% if page_num %}
+                                        {% if page_num == scans.page %}
+                                        <li class="page-item active">
+                                            <a class="page-link" href="{{ url_for('admin.scans', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('admin.scans', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">...</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if scans.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.scans', page=scans.next_num) }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Risk Distribution</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="riskDistributionChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Scan Trends</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="scanTrendsChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+        
+        // Simple search functionality
+        const searchInput = document.getElementById('searchScans');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('tbody tr');
+                
+                tableRows.forEach(row => {
+                    const domain = row.cells[1].textContent.toLowerCase();
+                    const username = row.cells[2].textContent.toLowerCase();
+                    
+                    if (domain.includes(searchTerm) || username.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Risk Distribution Chart
+        const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
+        new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                datasets: [{
+                    data: [
+                        {% if scans.items %}
+                            {{ scans.items|selectattr('risk_level', 'equalto', 'High Risk')|list|length }},
+                            {{ scans.items|selectattr('risk_level', 'equalto', 'Medium Risk')|list|length }},
+                            {{ scans.items|selectattr('risk_level', 'equalto', 'Low Risk')|list|length }}
+                        {% else %}
+                            0, 0, 0
+                        {% endif %}
+                    ],
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(40, 167, 69, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(40, 167, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#fff'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Scan Trends Chart
+        const trendsCtx = document.getElementById('scanTrendsChart').getContext('2d');
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                datasets: [{
+                    label: 'Scans',
+                    data: [12, 19, 8, 15, 12, 18, 22],
+                    fill: false,
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#fff'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

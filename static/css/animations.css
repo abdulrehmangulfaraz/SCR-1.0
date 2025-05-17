@@ -1,0 +1,510 @@
+/**
+ * SCR Platform - Animation Styles
+ * Custom animations and visual effects
+ */
+
+/* ----- Pulse Animation ----- */
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.pulse-btn:hover {
+    animation: pulse-light 1.5s infinite;
+}
+
+@keyframes pulse-light {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    }
+}
+
+/* ----- Floating Animation ----- */
+.floating {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* ----- Radar Animation ----- */
+.radar-animation.active .radar-line {
+    animation: radar-sweep 3s linear infinite;
+}
+
+@keyframes radar-sweep {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.radar-ping {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background-color: rgba(13, 110, 253, 0.7);
+    border-radius: 50%;
+    animation: radar-ping 2s ease-out;
+    pointer-events: none;
+}
+
+@keyframes radar-ping {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(20);
+        opacity: 0;
+    }
+}
+
+/* ----- Progress Animation ----- */
+.scan-complete-pulse {
+    animation: complete-pulse 2s;
+}
+
+@keyframes complete-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* ----- Typing Animation ----- */
+.typing {
+    border-right: 2px solid var(--primary);
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+    overflow: hidden;
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes blink-caret {
+    from, to {
+        border-color: transparent;
+    }
+    50% {
+        border-color: var(--primary);
+    }
+}
+
+/* ----- Hacker Text Effect ----- */
+.hacker-text {
+    position: relative;
+    display: inline-block;
+}
+
+.hacker-text::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 2px;
+    text-shadow: -1px 0 red;
+    top: 0;
+    color: var(--primary);
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: hacker-text 3s infinite linear alternate-reverse;
+}
+
+@keyframes hacker-text {
+    0% {
+        clip: rect(0, 900px, 5px, 0);
+    }
+    20% {
+        clip: rect(34px, 900px, 39px, 0);
+    }
+    40% {
+        clip: rect(68px, 900px, 73px, 0);
+    }
+    60% {
+        clip: rect(17px, 900px, 22px, 0);
+    }
+    80% {
+        clip: rect(86px, 900px, 91px, 0);
+    }
+    100% {
+        clip: rect(51px, 900px, 56px, 0);
+    }
+}
+
+/* ----- Blinking Effect ----- */
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+/* ----- Text Fade In ----- */
+.text-fade-in {
+    opacity: 0;
+    animation: text-fade-in 1s forwards;
+}
+
+@keyframes text-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Staggered Fade In for multiple elements */
+.stagger-fade-in > * {
+    opacity: 0;
+    animation: text-fade-in 0.5s forwards;
+}
+
+.stagger-fade-in > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-fade-in > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-fade-in > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-fade-in > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-fade-in > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-fade-in > *:nth-child(6) { animation-delay: 0.6s; }
+.stagger-fade-in > *:nth-child(7) { animation-delay: 0.7s; }
+.stagger-fade-in > *:nth-child(8) { animation-delay: 0.8s; }
+
+/* ----- Glitch Effect ----- */
+.glitch {
+    position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff0000;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 5s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+    left: -2px;
+    text-shadow: -1px 0 #00ff00;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+    0% { clip: rect(11px, 450px, 89px, 0); }
+    5% { clip: rect(49px, 450px, 92px, 0); }
+    10% { clip: rect(33px, 450px, 3px, 0); }
+    15% { clip: rect(89px, 450px, 14px, 0); }
+    20% { clip: rect(36px, 450px, 44px, 0); }
+    25% { clip: rect(97px, 450px, 92px, 0); }
+    30% { clip: rect(28px, 450px, 15px, 0); }
+    35% { clip: rect(19px, 450px, 5px, 0); }
+    40% { clip: rect(62px, 450px, 78px, 0); }
+    45% { clip: rect(73px, 450px, 52px, 0); }
+    50% { clip: rect(94px, 450px, 86px, 0); }
+    55% { clip: rect(39px, 450px, 52px, 0); }
+    60% { clip: rect(14px, 450px, 32px, 0); }
+    65% { clip: rect(3px, 450px, 12px, 0); }
+    70% { clip: rect(92px, 450px, 40px, 0); }
+    75% { clip: rect(100px, 450px, 31px, 0); }
+    80% { clip: rect(5px, 450px, 64px, 0); }
+    85% { clip: rect(37px, 450px, 47px, 0); }
+    90% { clip: rect(17px, 450px, 76px, 0); }
+    95% { clip: rect(59px, 450px, 98px, 0); }
+    100% { clip: rect(51px, 450px, 27px, 0); }
+}
+
+@keyframes glitch-anim-2 {
+    0% { clip: rect(17px, 450px, 23px, 0); }
+    5% { clip: rect(86px, 450px, 42px, 0); }
+    10% { clip: rect(93px, 450px, 35px, 0); }
+    15% { clip: rect(45px, 450px, 56px, 0); }
+    20% { clip: rect(9px, 450px, 79px, 0); }
+    25% { clip: rect(32px, 450px, 12px, 0); }
+    30% { clip: rect(53px, 450px, 26px, 0); }
+    35% { clip: rect(67px, 450px, 41px, 0); }
+    40% { clip: rect(38px, 450px, 8px, 0); }
+    45% { clip: rect(83px, 450px, 71px, 0); }
+    50% { clip: rect(24px, 450px, 56px, 0); }
+    55% { clip: rect(76px, 450px, 99px, 0); }
+    60% { clip: rect(81px, 450px, 3px, 0); }
+    65% { clip: rect(47px, 450px, 27px, 0); }
+    70% { clip: rect(98px, 450px, 92px, 0); }
+    75% { clip: rect(19px, 450px, 62px, 0); }
+    80% { clip: rect(72px, 450px, 45px, 0); }
+    85% { clip: rect(61px, 450px, 17px, 0); }
+    90% { clip: rect(84px, 450px, 73px, 0); }
+    95% { clip: rect(41px, 450px, 58px, 0); }
+    100% { clip: rect(23px, 450px, 91px, 0); }
+}
+
+/* ----- Loading Spinner Animations ----- */
+.spinner {
+    width: 40px;
+    height: 40px;
+    margin: 30px auto;
+    background-color: var(--primary);
+    border-radius: 100%;
+    animation: sk-scaleout 1.0s infinite ease-in-out;
+}
+
+@keyframes sk-scaleout {
+    0% { 
+        transform: scale(0);
+    } 100% {
+        transform: scale(1.0);
+        opacity: 0;
+    }
+}
+
+.loading-dots:after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% {
+        content: '.';
+    }
+    40% {
+        content: '..';
+    }
+    60% {
+        content: '...';
+    }
+    80%, 100% {
+        content: '';
+    }
+}
+
+/* ----- Hover Effects ----- */
+.icon-rotate:hover {
+    animation: icon-rotate 0.5s ease-in-out;
+}
+
+@keyframes icon-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.zoom-in {
+    transition: transform 0.3s ease;
+}
+
+.zoom-in:hover {
+    transform: scale(1.05);
+}
+
+/* ----- Special Effects ----- */
+.gradient-text {
+    background: linear-gradient(to right, #0d6efd, #17a2b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+}
+
+.highlight-glow {
+    text-shadow: 0 0 10px rgba(13, 110, 253, 0.7),
+                 0 0 20px rgba(13, 110, 253, 0.5),
+                 0 0 30px rgba(13, 110, 253, 0.3);
+}
+
+/* LED Blinking effect for "hacker-style" elements */
+.led-blink {
+    position: relative;
+    display: inline-block;
+}
+
+.led-blink::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #00ff00;
+    border-radius: 50%;
+    top: 50%;
+    right: -12px;
+    transform: translateY(-50%);
+    animation: led-blink 1.5s infinite;
+}
+
+@keyframes led-blink {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 5px #00ff00;
+    }
+    50% {
+        opacity: 0.3;
+        box-shadow: 0 0 2px #00ff00;
+    }
+}
+
+/* ----- Page Transition Effects ----- */
+.page-enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+}
+
+.page-exit {
+    opacity: 1;
+}
+
+.page-exit-active {
+    opacity: 0;
+    transition: opacity 300ms;
+}
+
+/* ----- Matrix Rain Effect ----- */
+.matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.matrix-rain {
+    color: #0f0;
+    position: absolute;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px #0f0;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* ----- Scan Complete Animation ----- */
+.scan-complete {
+    animation: scan-complete 1s ease-in-out;
+}
+
+@keyframes scan-complete {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* ----- Progress Bar Animation ----- */
+.progress-bar-animated {
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 1rem 1rem;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    from {
+        background-position: 1rem 0;
+    }
+    to {
+        background-position: 0 0;
+    }
+}
+
+/* Wave Animation */
+.wave {
+    animation-name: wave-animation;
+    animation-duration: 2.5s;
+    animation-iteration-count: infinite;
+    transform-origin: 70% 70%;
+    display: inline-block;
+}
+
+@keyframes wave-animation {
+    0% { transform: rotate( 0.0deg) }
+    10% { transform: rotate(14.0deg) }
+    20% { transform: rotate(-8.0deg) }
+    30% { transform: rotate(14.0deg) }
+    40% { transform: rotate(-4.0deg) }
+    50% { transform: rotate(10.0deg) }
+    60% { transform: rotate( 0.0deg) }
+    100% { transform: rotate( 0.0deg) }
+}

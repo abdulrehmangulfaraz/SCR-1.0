@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}View Scan - Admin - SCR Platform{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header" data-aos="fade-down">
+                <h1><i class="fas fa-search me-2"></i> View Scan Details</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('admin.scans') }}">Scans</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Scan #{{ scan.id }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-dark" data-aos="fade-up">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Scan Information</h4>
+                    <div>
+                        {% if scan.report_path %}
+                        <a href="{{ url_for('static', filename=scan.report_path.replace('static/', '')) }}" target="_blank" class="btn btn-info">
+                            <i class="fas fa-file-pdf me-2"></i> View PDF Report
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <h5>Basic Information</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item bg-dark">
+                                        <strong>Domain:</strong> {{ scan.domain }}
+                                    </li>
+                                    <li class="list-group-item bg-dark">
+                                        <strong>Scan ID:</strong> {{ scan.id }}
+                                    </li>
+                                    <li class="list-group-item bg-dark">
+                                        <strong>Scan Date:</strong> {{ scan.scan_date.strftime('%Y-%m-%d %H:%M:%S UTC') }}
+                                    </li>
+                                    <li class="list-group-item bg-dark">
+                                        <strong>User:</strong> 
+                                        {% if scan.user %}
+                                            {{ scan.user.username }} (ID: {{ scan.user.id }})
+                                        {% else %}
+                                            Unknown User
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <h5>Scan Results</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item bg-dark">
+                                        <strong>Risk Score:</strong> {{ scan.risk_score }}/10
+                                    </li>
+                                    <li class="list-group-item bg-dark">
+                                        <strong>Risk Level:</strong> 
+                                        {% if scan.risk_level == 'High Risk' %}
+                                            <span class="badge bg-danger">{{ scan.risk_level }}</span>
+                                        {% elif scan.risk_level == 'Medium Risk' %}
+                                            <span class="badge bg-warning text-dark">{{ scan.risk_level }}</span>
+                                        {% else %}
+                                            <span class="badge bg-success">{{ scan.risk_level }}</span>
+                                        {% endif %}
+                                    </li>
+                                    <li class="list-group-item bg-dark">
+                                        <strong>Vulnerabilities Found:</strong> 
+                                        {{ scan.scan_results.get('vulnerabilities', [])|length }}
+                                    </li>
+                                    <li class="list-group-item bg-dark">
+                                        <strong>IP Address:</strong> 
+                                        {{ scan.scan_results.get('ip', 'Unknown') }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vulnerabilities Section -->
+                    <div class="section-container mb-4">
+                        <h5 class="section-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Vulnerabilities
+                        </h5>
+                        <div class="section-content">
+                            {% set vulnerabilities = scan.scan_results.get('vulnerabilities', []) %}
+                            {% if vulnerabilities %}
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Severity</th>
+                                                <th>Description</th>
+                                                <th>Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for vuln in vulnerabilities %}
+                                                <tr>
+                                                    <td>{{ vuln.type }}</td>
+                                                    <td>
+                                                        {% if vuln.severity == 'High' %}
+                                                            <span class="badge bg-danger">{{ vuln.severity }}</span>
+                                                        {% elif vuln.severity == 'Medium' %}
+                                                            <span class="badge bg-warning text-dark">{{ vuln.severity }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-success">{{ vuln.severity }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ vuln.description }}</td>
+                                                    <td>{{ vuln.details }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    No vulnerabilities detected in this scan.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Open Ports Section -->
+                    <div class="section-container mb-4">
+                        <h5 class="section-title">
+                            <i class="fas fa-network-wired me-2"></i> Open Ports
+                        </h5>
+                        <div class="section-content">
+                            {% set open_ports = scan.scan_results.get('reconnaissance', {}).get('open_ports', []) %}
+                            {% if open_ports %}
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Port</th>
+                                                <th>Protocol</th>
+                                                <th>Service</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for port in open_ports %}
+                                                <tr>
+                                                    <td>{{ port.port }}</td>
+                                                    <td>{{ port.protocol }}</td>
+                                                    <td>{{ port.service }}</td>
+                                                    <td>
+                                                        <span class="badge bg-danger">{{ port.state }}</span>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No open ports detected in this scan.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- DNS Records Section -->
+                    <div class="section-container mb-4">
+                        <h5 class="section-title">
+                            <i class="fas fa-server me-2"></i> DNS Records
+                        </h5>
+                        <div class="section-content">
+                            {% set dns_records = scan.scan_results.get('reconnaissance', {}).get('dns_records', []) %}
+                            {% if dns_records %}
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for record in dns_records %}
+                                                <tr>
+                                                    <td>{{ record.type }}</td>
+                                                    <td><code>{{ record.value }}</code></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No DNS records found in this scan.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Raw Results -->
+                    <div class="section-container">
+                        <h5 class="section-title">
+                            <i class="fas fa-code me-2"></i> Raw Scan Results
+                        </h5>
+                        <div class="section-content">
+                            <div class="code-container">
+                                <pre class="bg-dark text-light p-3"><code>{{ scan.scan_results|tojson(indent=2) }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{{ url_for('admin.scans') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Scan List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+    });
+</script>
+{% endblock %}

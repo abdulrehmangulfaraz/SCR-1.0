@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Report - {{ scan.domain }} - SCR Platform{% endblock %}
+
+{% block content %}
+<div class="report-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-dark" data-aos="fade-up">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i> Scan Report: {{ scan.domain }}
+                    </h2>
+                    <div>
+                        {% if scan.report_path %}
+                        <a href="{{ url_for('static', filename=scan.report_path.replace('static\\', '').replace('\\', '/')) }}" download class="btn btn-info me-2">
+                            <i class="fas fa-file-pdf me-2"></i> Download PDF
+                        </a>
+
+                        {% endif %}
+                        <a href="{{ url_for('scan.rescan', scan_id=scan.id) }}" class="btn btn-primary">
+                            <i class="fas fa-sync-alt me-2"></i> Rescan
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="report-summary mb-4" data-aos="fade-up" data-aos-delay="100">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="summary-card">
+                                    <div class="summary-header">
+                                        <h4>Scan Information</h4>
+                                    </div>
+                                    <div class="summary-body">
+                                        <ul class="list-unstyled">
+                                            <li><strong>Domain:</strong> {{ scan.domain }}</li>
+                                            <li><strong>Scan Date:</strong> {{ scan.scan_date.strftime('%Y-%m-%d %H:%M:%S UTC') }}</li>
+                                            <li>
+                                                <strong>IP Address:</strong> 
+                                                {{ scan.scan_results.get('ip', 'Unknown') }}
+                                            </li>
+                                            <li>
+                                                <strong>Scan Duration:</strong> 
+                                                {{ scan.scan_results.get('scan_duration', 'Unknown') }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="summary-card">
+                                    <div class="summary-header">
+                                        <h4>Risk Assessment</h4>
+                                    </div>
+                                    <div class="summary-body d-flex align-items-center justify-content-between">
+                                        <div class="risk-score-container">
+                                            <div class="risk-score 
+                                                {% if scan.risk_level == 'High Risk' %}risk-high{% endif %}
+                                                {% if scan.risk_level == 'Medium Risk' %}risk-medium{% endif %}
+                                                {% if scan.risk_level == 'Low Risk' %}risk-low{% endif %}
+                                            ">
+                                                {{ scan.risk_score }}/10
+                                            </div>
+                                            <div class="risk-level-text">
+                                                {% if scan.risk_level == 'High Risk' %}
+                                                    <span class="text-danger">{{ scan.risk_level }}</span>
+                                                {% elif scan.risk_level == 'Medium Risk' %}
+                                                    <span class="text-warning">{{ scan.risk_level }}</span>
+                                                {% else %}
+                                                    <span class="text-success">{{ scan.risk_level }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="risk-details">
+                                            <p><strong>Vulnerabilities Found:</strong> {{ scan.scan_results.get('vulnerabilities', [])|length }}</p>
+                                            <p><strong>Open Ports:</strong> {{ scan.scan_results.get('reconnaissance', {}).get('open_ports', [])|length }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vulnerability Section -->
+                    <div class="report-section mb-4" data-aos="fade-up" data-aos-delay="200">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-exclamation-triangle me-2"></i> 
+                                Vulnerabilities
+                            </h3>
+                        </div>
+                        <div class="section-body">
+                            {% set vulnerabilities = scan.scan_results.get('vulnerabilities', []) %}
+                            {% if vulnerabilities %}
+                                {% for vuln in vulnerabilities %}
+                                    <div class="vulnerability-item 
+                                        {% if vuln.severity == 'High' %}vuln-high{% endif %}
+                                        {% if vuln.severity == 'Medium' %}vuln-medium{% endif %}
+                                        {% if vuln.severity == 'Low' %}vuln-low{% endif %}
+                                    ">
+                                        <div class="vuln-header d-flex justify-content-between align-items-center">
+                                            <h4>{{ vuln.type }}</h4>
+                                            <span class="vuln-severity
+                                                {% if vuln.severity == 'High' %}badge bg-danger{% endif %}
+                                                {% if vuln.severity == 'Medium' %}badge bg-warning text-dark{% endif %}
+                                                {% if vuln.severity == 'Low' %}badge bg-success{% endif %}
+                                            ">
+                                                {{ vuln.severity }} Severity
+                                            </span>
+                                        </div>
+                                        <div class="vuln-body">
+                                            <p><strong>Description:</strong> {{ vuln.description }}</p>
+                                            <p><strong>Details:</strong> {{ vuln.details }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-vulnerabilities text-center py-4">
+                                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                    <h4>No Vulnerabilities Detected</h4>
+                                    <p class="text-muted">The scan did not find any vulnerabilities on this domain.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Open Ports Section -->
+                    <div class="report-section mb-4" data-aos="fade-up" data-aos-delay="300">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-network-wired me-2"></i> 
+                                Open Ports & Services
+                            </h3>
+                        </div>
+                        <div class="section-body">
+                            {% set open_ports = scan.scan_results.get('reconnaissance', {}).get('open_ports', []) %}
+                            {% if open_ports %}
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Port</th>
+                                                <th>Protocol</th>
+                                                <th>Service</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for port in open_ports %}
+                                                <tr>
+                                                    <td>{{ port.port }}</td>
+                                                    <td>{{ port.protocol }}</td>
+                                                    <td>{{ port.service }}</td>
+                                                    <td>
+                                                        <span class="badge bg-danger">Open</span>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="empty-ports text-center py-4">
+                                    <i class="fas fa-lock fa-3x text-success mb-3"></i>
+                                    <h4>No Open Ports Detected</h4>
+                                    <p class="text-muted">The scan did not find any open ports on this domain.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- DNS Records Section -->
+                    <div class="report-section mb-4" data-aos="fade-up" data-aos-delay="400">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-server me-2"></i> 
+                                DNS Records
+                            </h3>
+                        </div>
+                        <div class="section-body">
+                            {% set dns_records = scan.scan_results.get('reconnaissance', {}).get('dns_records', []) %}
+                            {% if dns_records %}
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for record in dns_records %}
+                                                <tr>
+                                                    <td><strong>{{ record.type }}</strong></td>
+                                                    <td><code>{{ record.value }}</code></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="empty-dns text-center py-4">
+                                    <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                    <h4>No DNS Records Found</h4>
+                                    <p class="text-muted">The scan could not retrieve DNS records for this domain.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- WHOIS Information Section -->
+                    <div class="report-section" data-aos="fade-up" data-aos-delay="500">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-info-circle me-2"></i> 
+                                WHOIS Information
+                            </h3>
+                        </div>
+                        <div class="section-body">
+                            {% set whois_data = scan.scan_results.get('reconnaissance', {}).get('whois', {}) %}
+                            {% if whois_data and not whois_data.get('error') %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-group whois-list">
+                                            {% if whois_data.registrar %}
+                                            <li class="list-group-item bg-dark">
+                                                <strong>Registrar:</strong> {{ whois_data.registrar }}
+                                            </li>
+                                            {% endif %}
+                                            {% if whois_data.creation_date %}
+                                            <li class="list-group-item bg-dark">
+                                                <strong>Created:</strong> {{ whois_data.creation_date }}
+                                            </li>
+                                            {% endif %}
+                                            {% if whois_data.expiration_date %}
+                                            <li class="list-group-item bg-dark">
+                                                <strong>Expires:</strong> {{ whois_data.expiration_date }}
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-group whois-list">
+                                            {% if whois_data.updated_date %}
+                                            <li class="list-group-item bg-dark">
+                                                <strong>Updated:</strong> {{ whois_data.updated_date }}
+                                            </li>
+                                            {% endif %}
+                                            {% if whois_data.status %}
+                                            <li class="list-group-item bg-dark">
+                                                <strong>Status:</strong> 
+                                                {% if whois_data.status is string %}
+                                                    {{ whois_data.status }}
+                                                {% else %}
+                                                    {{ whois_data.status|join(', ') }}
+                                                {% endif %}
+                                            </li>
+                                            {% endif %}
+                                            {% if whois_data.name_servers %}
+                                            <li class="list-group-item bg-dark">
+                                                <strong>Name Servers:</strong> 
+                                                {% if whois_data.name_servers is string %}
+                                                    {{ whois_data.name_servers }}
+                                                {% else %}
+                                                    {{ whois_data.name_servers|join(', ') }}
+                                                {% endif %}
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="empty-whois text-center py-4">
+                                    <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                    <h4>No WHOIS Information Available</h4>
+                                    <p class="text-muted">The scan could not retrieve WHOIS information for this domain.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-center py-3">
+                    <p class="mb-0 text-muted">
+                        <i class="fas fa-shield-alt me-1"></i> 
+                        This report was generated by SCR - Secure Cyber Reconnaissance
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+    });
+</script>
+{% endblock %}

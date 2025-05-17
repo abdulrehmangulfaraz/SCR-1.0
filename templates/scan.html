@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Security Scan - SCR Platform{% endblock %}
+
+{% block content %}
+<div class="scan-container">
+    {% if scanning %}
+        <div class="scan-process-container">
+            <h1 class="text-center mb-4" data-aos="fade-down">Scanning {{ target_domain }}</h1>
+            
+            <div class="scan-progress-container" data-aos="fade-up">
+                <div class="radar-animation">
+                    <div class="radar-spinner"></div>
+                    <div class="radar-face"></div>
+                    <div class="radar-line"></div>
+                </div>
+                
+                <div class="progress mt-4 mb-2">
+                    <div id="scan-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                </div>
+                
+                <div id="scan-status" class="text-center">
+                    <p>Initializing scan...</p>
+                </div>
+                
+                <div class="stages-container">
+                    <div class="stage-item" id="stage-recon">
+                        <div class="stage-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="stage-info">
+                            <h5>Reconnaissance</h5>
+                            <p>Gathering information</p>
+                        </div>
+                        <div class="stage-status">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stage-item" id="stage-vuln">
+                        <div class="stage-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="stage-info">
+                            <h5>Vulnerability Scan</h5>
+                            <p>Checking for security issues</p>
+                        </div>
+                        <div class="stage-status">
+                            <div class="spinner-border spinner-border-sm text-primary d-none" role="status"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stage-item" id="stage-report">
+                        <div class="stage-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stage-info">
+                            <h5>Report Generation</h5>
+                            <p>Creating detailed report</p>
+                        </div>
+                        <div class="stage-status">
+                            <div class="spinner-border spinner-border-sm text-primary d-none" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="scan-result-container" class="d-none mt-4 text-center">
+                    <a id="view-report-btn" href="#" class="btn btn-primary btn-lg">
+                        <i class="fas fa-eye me-2"></i> View Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="scan-form-card">
+                    <h1 class="mb-4">Security Scan</h1>
+                    <p class="lead mb-4">Enter a domain to scan for vulnerabilities, open ports, and security issues.</p>
+                    
+                    <form id="scan-form" action="{{ url_for('scan.scan') }}" method="POST">
+                        <div class="form-group mb-4">
+                            <label for="domain" class="form-label">Domain or URL</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-primary"><i class="fas fa-globe"></i></span>
+                                <input type="text" class="form-control form-control-lg bg-dark text-light border-primary" id="domain" name="domain" placeholder="example.com" required>
+                            </div>
+                            <small class="form-text text-muted">Enter a domain name or full URL</small>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">Scan Type</label>
+                            <div class="row">
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    <div class="scan-type-option">
+                                        <input type="radio" class="btn-check" name="scan_type" id="option-full" value="full" checked>
+                                        <label class="btn btn-outline-primary w-100" for="option-full">
+                                            <i class="fas fa-shield-alt mb-2"></i>
+                                            <span class="d-block">Full Scan</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    <div class="scan-type-option">
+                                        <input type="radio" class="btn-check" name="scan_type" id="option-quick" value="quick">
+                                        <label class="btn btn-outline-primary w-100" for="option-quick">
+                                            <i class="fas fa-bolt mb-2"></i>
+                                            <span class="d-block">Quick Scan</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="scan-type-option">
+                                        <input type="radio" class="btn-check" name="scan_type" id="option-headers" value="headers">
+                                        <label class="btn btn-outline-primary w-100" for="option-headers">
+                                            <i class="fas fa-code mb-2"></i>
+                                            <span class="d-block">Headers Only</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="advanced-options mb-4">
+                            <a data-bs-toggle="collapse" href="#collapseOptions" role="button" aria-expanded="false" aria-controls="collapseOptions">
+                                <i class="fas fa-cog me-1"></i> Advanced Options
+                            </a>
+                            <div class="collapse mt-3" id="collapseOptions">
+                                <div class="card card-body bg-gradient-dark">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="check-ports" name="scan_ports" checked>
+                                        <label class="form-check-label" for="check-ports">
+                                            Port Scanning
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="check-vulns" name="scan_vulnerabilities" checked>
+                                        <label class="form-check-label" for="check-vulns">
+                                            Vulnerability Detection
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="check-pdf" name="generate_pdf" checked>
+                                        <label class="form-check-label" for="check-pdf">
+                                            Generate PDF Report
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 pulse-btn">
+                                <i class="fas fa-search me-2"></i> Start Scan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="scan-features-card">
+                    <h3>What We Scan For</h3>
+                    
+                    <div class="scan-feature-item">
+                        <div class="scan-feature-icon bg-danger">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="scan-feature-content">
+                            <h5>SQL Injection</h5>
+                            <p>Detects potential SQL injection vulnerabilities that could lead to data breaches</p>
+                            <span class="badge bg-danger">+4 Risk Score</span>
+                        </div>
+                    </div>
+                    
+                    <div class="scan-feature-item">
+                        <div class="scan-feature-icon bg-danger">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="scan-feature-content">
+                            <h5>Cross-Site Scripting (XSS)</h5>
+                            <p>Identifies XSS vulnerabilities that allow injection of malicious scripts</p>
+                            <span class="badge bg-danger">+3 Risk Score</span>
+                        </div>
+                    </div>
+                    
+                    <div class="scan-feature-item">
+                        <div class="scan-feature-icon bg-warning">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="scan-feature-content">
+                            <h5>Security Headers</h5>
+                            <p>Checks for missing security headers that protect your application</p>
+                            <span class="badge bg-warning text-dark">+2 Risk Score</span>
+                        </div>
+                    </div>
+                    
+                    <div class="scan-feature-item">
+                        <div class="scan-feature-icon bg-warning">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <div class="scan-feature-content">
+                            <h5>Open Ports</h5>
+                            <p>Detects potentially vulnerable open ports and services</p>
+                            <span class="badge bg-warning text-dark">+1 Each</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Risk Categories</h5>
+                        <div class="risk-levels">
+                            <div class="risk-level">
+                                <span class="risk-indicator bg-success"></span>
+                                <div>
+                                    <h6>Low Risk</h6>
+                                    <p>Score: 0-3</p>
+                                </div>
+                            </div>
+                            <div class="risk-level">
+                                <span class="risk-indicator bg-warning"></span>
+                                <div>
+                                    <h6>Medium Risk</h6>
+                                    <p>Score: 4-6</p>
+                                </div>
+                            </div>
+                            <div class="risk-level">
+                                <span class="risk-indicator bg-danger"></span>
+                                <div>
+                                    <h6>High Risk</h6>
+                                    <p>Score: 7-10</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/scan.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+        
+        {% if scanning %}
+        // Prevent duplicate scan issue by making sure we only start once
+        if (!window.scanStarted) {
+            window.scanStarted = true;
+            // Start the scanning process
+            startScan("{{ target_domain }}", "{{ scan_type }}");
+        }
+        {% endif %}
+    });
+</script>
+{% endblock %}

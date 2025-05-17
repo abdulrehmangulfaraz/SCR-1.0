@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SCR Platform{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-banner" data-aos="fade-down">
+                <h1>Welcome, {{ current_user.username }}</h1>
+                <p class="lead">Your secure reconnaissance dashboard</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-3 mb-4 mb-md-0">
+            <div class="stat-card bg-gradient-primary" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.total_scans }}</h2>
+                    <p>Total Scans</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0">
+            <div class="stat-card bg-gradient-danger" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.high_risk }}</h2>
+                    <p>High Risk</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0">
+            <div class="stat-card bg-gradient-warning" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.medium_risk }}</h2>
+                    <p>Medium Risk</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-gradient-success" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ stats.low_risk }}</h2>
+                    <p>Low Risk</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card bg-gradient-dark" data-aos="fade-up">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Recent Scans</h4>
+                    <a href="{{ url_for('scan.history') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-history"></i> View All
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Date</th>
+                                    <th>Risk Score</th>
+                                    <th>Risk Level</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_scans %}
+                                    {% for scan in recent_scans %}
+                                        <tr>
+                                            <td>{{ scan.domain }}</td>
+                                            <td>{{ scan.scan_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ scan.risk_score }}</td>
+                                            <td>
+                                                {% if scan.risk_level == 'High Risk' %}
+                                                    <span class="badge bg-danger">{{ scan.risk_level }}</span>
+                                                {% elif scan.risk_level == 'Medium Risk' %}
+                                                    <span class="badge bg-warning text-dark">{{ scan.risk_level }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">{{ scan.risk_level }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('scan.scan_result', scan_id=scan.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('scan.rescan', scan_id=scan.id) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No scans found. <a href="{{ url_for('scan.scan') }}">Start your first scan</a></td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card bg-gradient-dark mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Risk Distribution</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <canvas id="riskChart" width="100%" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-gradient-dark" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Quick Scan</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('scan.scan') }}" method="POST">
+                        <div class="form-group mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-primary"><i class="fas fa-globe"></i></span>
+                                <input type="text" class="form-control bg-dark text-light border-primary" name="domain" placeholder="example.com" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 pulse-btn">
+                            <i class="fas fa-search me-2"></i> Scan Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+        
+        // Risk distribution chart
+        var ctx = document.getElementById('riskChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                datasets: [{
+                    data: [{{ stats.high_risk }}, {{ stats.medium_risk }}, {{ stats.low_risk }}],
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(40, 167, 69, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(40, 167, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#fff'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

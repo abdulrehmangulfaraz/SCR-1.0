@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - SCR Platform{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="row">
+        <div class="col-lg-4 mb-4" data-aos="fade-up">
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Account Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar-container">
+                            <i class="fas fa-user-circle fa-1x"></i>
+                        </div>
+                        <h3 class="mt-3">{{ current_user.username }}</h3>
+                        <p class="text-muted">{{ current_user.email }}</p>
+                        <p class="text-muted">
+                            <small>Member since {{ current_user.created_at.strftime('%Y-%m-%d') }}</small>
+                        </p>
+                    </div>
+                    
+                    <ul class="list-group account-info">
+                        <li class="list-group-item bg-dark">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-shield-alt me-2"></i> Account Type
+                                </div>
+                                <div>
+                                    {% if current_user.is_admin %}
+                                        <span class="badge bg-primary">Administrator</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Standard User</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item bg-dark">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-lock me-2"></i> Password
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                        Change
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8" data-aos="fade-up" data-aos-delay="100">
+            <div class="card bg-gradient-dark mb-4">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Scan Statistics</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="stat-card bg-gradient-dark">
+                                <div class="stat-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h2 id="total-scans">...</h2>
+                                    <p>Total Scans</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="stat-card bg-gradient-dark">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h2 id="recent-scans">...</h2>
+                                    <p>Scans This Month</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <div class="stat-card bg-gradient-dark">
+                                <div class="stat-icon danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h2 id="high-risk-scans">...</h2>
+                                    <p>High Risk Scans</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card bg-gradient-dark">
+                                <div class="stat-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h2 id="safe-scans">...</h2>
+                                    <p>Safe Scans</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-gradient-dark">
+                <div class="card-header bg-transparent">
+                    <h4 class="mb-0">Activity Log</h4>
+                </div>
+                <div class="card-body">
+                    <div id="activity-timeline" class="timeline">
+                        <div class="timeline-loader text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading activity data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark">
+            <form action="{{ url_for('auth.change_password') }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="current_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control bg-dark text-light border-primary" id="current_password" name="current_password" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="new_password" class="form-label">New Password</label>
+                        <input type="password" class="form-control bg-dark text-light border-primary" id="new_password" name="new_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control bg-dark text-light border-primary" id="confirm_password" name="confirm_password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            once: true
+        });
+        
+        // Load activity data
+        setTimeout(function() {
+            const timelineData = {{ activities|tojson }};
+            
+            const timeline = document.getElementById('activity-timeline');
+            timeline.innerHTML = '';
+            
+            if (timelineData && timelineData.length > 0) {
+                timelineData.forEach(activity => {
+                    const item = document.createElement('div');
+                    item.className = 'timeline-item animate__animated animate__fadeInUp';
+                    item.innerHTML = `
+                        <div class="timeline-icon bg-${activity.color}">
+                            <i class="${activity.icon}"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <p class="timeline-time">${activity.time}</p>
+                            <p class="timeline-text">${activity.action}</p>
+                        </div>
+                    `;
+                    timeline.appendChild(item);
+                });
+            } else {
+                // If no activities, show a message
+                timeline.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-muted">No activity recorded yet</p>
+                        <a href="{{ url_for('scan.scan') }}" class="btn btn-sm btn-primary mt-2">
+                            <i class="fas fa-search me-1"></i> Start Your First Scan
+                        </a>
+                    </div>
+                `;
+            }
+            
+            // Update stats with real data
+            document.getElementById('total-scans').textContent = '{{ stats.total_scans }}';
+            document.getElementById('recent-scans').textContent = '{{ stats.scans_this_month }}';
+            document.getElementById('high-risk-scans').textContent = '{{ stats.high_risk_scans }}';
+            document.getElementById('safe-scans').textContent = '{{ stats.safe_scans }}';
+        }, 800);
+    });
+</script>
+{% endblock %}
